@@ -38,8 +38,17 @@ function rz=lwr(p,X,z,tau)
 
   ## CHANGE THE FOLLOWING CODE
   ## You have to replace it for proper LWR code
-  theta=pinv(X)*z(:);
-  rz=p*theta;
+  rz = [];
+  sx = rows(X);
+  ntau = 2*tau**2;
+  for i = 1:rows(p)
+    W = ones(sx,1)*p(i,:) - X;
+    W = vecnorm(W,2,2).^2 / -ntau;
+    W = diag(exp(W));
+    theta = inv(X'*W*X)*X'*W*z(:);
+    rz = [rz; p(i,:)*theta];
+  endfor
+
 endfunction
 
 ## Use for the experiments just 0,5% of the total available data.
@@ -78,7 +87,7 @@ printf("Weighed regression started...");
 fflush(stdout);
 tic();
 
-tau=5;
+tau=32;
 nz = lwr(NX,X,z,tau);
 
 printf("done.\n");
