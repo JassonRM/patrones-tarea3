@@ -6,6 +6,21 @@
 
 1;
 
+## Linear regression
+##
+## p: matrix of size m x 2, with m 2D positions on which
+##    the z value needs to be regressed
+## X: support data (or training data) with all known 2D positions
+## y: support data with the corresponding z values for each position
+##
+## The number of rows of X must be equal to the length of y
+##
+## The function must generate the z position for all
+function rz=lr(p,X,z)
+  theta=pinv(X)*z(:);
+  rz=p*theta;
+endfunction
+
 ## Locally weighted regression
 ##
 ## p: matrix of size m x 2, with m 2D positions on which
@@ -48,6 +63,30 @@ NX = [xx(:) yy(:)];
 printf("Regression started...");
 fflush(stdout);
 tic();
+
+lrz = lr(NX, X, z);
+
+printf("done.\n");
+toc()
+fflush(stdout);
+
+figure(1,"name","Sensed data");
+plot3(X(:,1),X(:,2),z',".");
+xlabel("x")
+ylabel("y")
+zlabel("z")
+
+
+figure(2,"name","Regressed data");
+hold off;
+#plot3(X(:,1),X(:,2),y',"b.");
+#hold on;
+plot3(NX(:,1),NX(:,2),lrz,"r.");
+#surf(xx,yy,reshape(ny,size(xx)));
+xlabel("x")
+ylabel("y")
+zlabel("z")
+title("Linear regression")
 
 ## Locally weighed regression on the data
 ## This will take a LONG time once finished
