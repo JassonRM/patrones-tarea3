@@ -17,7 +17,9 @@
 ##
 ## The function must generate the z position for all
 function rz=lr(p,X,z)
+  X = [ones(length(X), 1), X];
   theta=pinv(X)*z(:);
+  p = [ones(length(p), 1), p];
   rz=p*theta;
 endfunction
 
@@ -60,7 +62,7 @@ partition=75;
 ## The grid
 NX = [xx(:) yy(:)];
 
-printf("Regression started...");
+printf("Linear regression started...");
 fflush(stdout);
 tic();
 
@@ -70,26 +72,12 @@ printf("done.\n");
 toc()
 fflush(stdout);
 
-figure(1,"name","Sensed data");
-plot3(X(:,1),X(:,2),z',".");
-xlabel("x")
-ylabel("y")
-zlabel("z")
-
-
-figure(2,"name","Regressed data");
-hold off;
-#plot3(X(:,1),X(:,2),y',"b.");
-#hold on;
-plot3(NX(:,1),NX(:,2),lrz,"r.");
-#surf(xx,yy,reshape(ny,size(xx)));
-xlabel("x")
-ylabel("y")
-zlabel("z")
-title("Linear regression")
-
 ## Locally weighed regression on the data
 ## This will take a LONG time once finished
+printf("Weighed regression started...");
+fflush(stdout);
+tic();
+
 tau=5;
 nz = lwr(NX,X,z,tau);
 
@@ -97,14 +85,15 @@ printf("done.\n");
 toc()
 fflush(stdout);
 
+## Plot all the data and results
+
 figure(1,"name","Sensed data");
 plot3(X(:,1),X(:,2),z',".");
 xlabel("x")
 ylabel("y")
 zlabel("z")
 
-
-figure(2,"name","Regressed data");
+figure(2,"name","Regressed data (LWR)");
 hold off;
 #plot3(X(:,1),X(:,2),y',"b.");
 #hold on;
@@ -114,3 +103,14 @@ xlabel("x")
 ylabel("y")
 zlabel("z")
 title("Once fixed, this shouldn't be a plane") ## REMOVE ME WHEN DONE
+
+figure(3,"name","Regressed data (LR)");
+hold off;
+#plot3(X(:,1),X(:,2),y',"b.");
+#hold on;
+plot3(NX(:,1),NX(:,2),lrz,"r.");
+#surf(xx,yy,reshape(ny,size(xx)));
+xlabel("x")
+ylabel("y")
+zlabel("z")
+title("Linear regression")
