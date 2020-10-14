@@ -111,7 +111,6 @@ plot3(NX(:,1),NX(:,2),nz,"r.");
 xlabel("x")
 ylabel("y")
 zlabel("z")
-title("Once fixed, this shouldn't be a plane") ## REMOVE ME WHEN DONE
 
 figure(3,"name","Regressed data (LR)");
 hold off;
