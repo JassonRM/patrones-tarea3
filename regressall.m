@@ -11,7 +11,7 @@
 ## p: matrix of size m x 2, with m 2D positions on which
 ##    the z value needs to be regressed
 ## X: support data (or training data) with all known 2D positions
-## y: support data with the corresponding z values for each position
+## z: support data with the corresponding z values for each position
 ##
 ## The number of rows of X must be equal to the length of y
 ##
@@ -28,16 +28,12 @@ endfunction
 ## p: matrix of size m x 2, with m 2D positions on which
 ##    the z value needs to be regressed
 ## X: support data (or training data) with all known 2D positions
-## y: support data with the corresponding z values for each position
+## z: support data with the corresponding z values for each position
 ##
 ## The number of rows of X must be equal to the length of y
 ##
 ## The function must generate the z position for all
 function rz=lwr(p,X,z,tau)
-  ## This code is for simple linear regression
-
-  ## CHANGE THE FOLLOWING CODE
-  ## You have to replace it for proper LWR code
   rz = [];
   sx = rows(X);
   ntau = 2*tau**2;
@@ -49,6 +45,11 @@ function rz=lwr(p,X,z,tau)
     rz = [rz; p(i,:)*theta];
   endfor
 
+endfunction
+
+function error=loss(reference, regressed)
+  temp = log(cosh(regressed - reference));
+  error = sum(temp);
 endfunction
 
 ## Use for the experiments just 0,5% of the total available data.
@@ -94,6 +95,22 @@ printf("done.\n");
 toc()
 fflush(stdout);
 
+## Calculate the error for different values of tau
+lower_error = 1e10;
+best_tau = 0;
+for tau=20:100:20
+  nz1 = lwr(RX, X, z, tau);
+  err = loss(rz, nz1)
+  if err < lower_error
+    lower_error = err;
+    best_tau = tau;
+  endif
+endfor
+
+## Calculate for the grid with best tau value
+best_z = lwr(NX,X,z,tau);
+
+
 ## Plot all the data and results
 
 figure(1,"name","Sensed data");
@@ -111,6 +128,7 @@ plot3(NX(:,1),NX(:,2),nz,"r.");
 xlabel("x")
 ylabel("y")
 zlabel("z")
+title("Linear weighted regression")
 
 figure(3,"name","Regressed data (LR)");
 hold off;
@@ -122,3 +140,14 @@ xlabel("x")
 ylabel("y")
 zlabel("z")
 title("Linear regression")
+
+figure(4,"name","Best Tau (LWR)");
+hold off;
+#plot3(X(:,1),X(:,2),y',"b.");
+#hold on;
+plot3(NX(:,1),NX(:,2),best_z,"r.");
+#surf(xx,yy,reshape(ny,size(xx)));
+xlabel("x")
+ylabel("y")
+zlabel("z")
+title("Best tau value")
