@@ -37,11 +37,13 @@ function rz=lwr(p,X,z,tau)
   rz = [];
   sx = rows(X);
   ntau = 2*tau**2;
+  X = [ones(length(X), 1), X];
+  p = [ones(length(p), 1), p];
   for i = 1:rows(p)
     W = ones(sx,1)*p(i,:) - X;
     W = vecnorm(W,2,2).^2 / -ntau;
-    W = diag(exp(W));
-    theta = inv(X'*W*X)*X'*W*z(:);
+    W = exp(W);
+    theta = inv(X'*(W.*X))*X'*(W.*z(:));
     rz = [rz; p(i,:)*theta];
   endfor
 
@@ -98,9 +100,9 @@ fflush(stdout);
 ## Calculate the error for different values of tau
 lower_error = 1e10;
 best_tau = 0;
-for tau=20:100:20
-  nz1 = lwr(RX, X, z, tau);
-  err = loss(rz, nz1)
+for tau=10:5:20
+  nz1 = lwr(X, X, z, tau);
+  err = loss(z(:), nz1)
   if err < lower_error
     lower_error = err;
     best_tau = tau;
@@ -108,7 +110,7 @@ for tau=20:100:20
 endfor
 
 ## Calculate for the grid with best tau value
-best_z = lwr(NX,X,z,tau);
+best_z = lwr(NX,X,z,best_tau);
 
 
 ## Plot all the data and results
