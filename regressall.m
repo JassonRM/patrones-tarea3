@@ -43,15 +43,18 @@ function rz=lwr(p,X,z,tau)
     W = ones(sx,1)*p(i,:) - X;
     W = vecnorm(W,2,2).^2 / -ntau;
     W = exp(W);
-    theta = inv(X'*(W.*X))*X'*(W.*z(:));
+    theta = pinv(X'*(W.*X))*X'*(W.*z(:));
     rz = [rz; p(i,:)*theta];
   endfor
 
 endfunction
 
 function error=loss(reference, regressed)
-  temp = log(cosh(regressed - reference));
-  error = sum(temp);
+  % temp = log(cosh(regressed - reference));
+  % error = sum(temp);
+  temp = (regressed - reference).^2;
+  n = size(temp)(1);
+  error = sum(temp) / n;
 endfunction
 
 ## Use for the experiments just 0,5% of the total available data.
@@ -73,6 +76,8 @@ partition=75;
 
 ## The grid
 NX = [xx(:) yy(:)];
+indices = sub2ind([maxx, maxy], NX(:,1), NX(:,2));
+rnz = rz(indices);
 
 printf("Linear regression started...");
 fflush(stdout);
@@ -99,19 +104,19 @@ fflush(stdout);
 
 ## Calculate the error for different values of tau
 lower_error = 1e10;
+best_z = [];
 best_tau = 0;
-for tau=10:5:20
-  nz1 = lwr(X, X, z, tau);
-  err = loss(z(:), nz1)
+for tau=1:10:100
+  nz1 = lwr(NX, X, z, tau);
+  err = loss(rnz, nz1);
   if err < lower_error
     lower_error = err;
+    best_z = nz1;
     best_tau = tau;
   endif
 endfor
 
-## Calculate for the grid with best tau value
-best_z = lwr(NX,X,z,best_tau);
-
+printf("El mejor tau es %d\n", best_tau);
 
 ## Plot all the data and results
 
