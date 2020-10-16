@@ -50,11 +50,15 @@ function rz=lwr(p,X,z,tau)
 endfunction
 
 function error=loss(reference, regressed)
-  % temp = log(cosh(regressed - reference));
-  % error = sum(temp);
-  temp = (regressed - reference).^2;
-  n = size(temp)(1);
-  error = sum(temp) / n;
+
+  ## Log-Cosh
+  temp = log(cosh(regressed - reference));
+  error = sum(temp);
+
+  ## MSE
+  % R = (regressed - reference);
+  % n = size(R)(1);
+  % error = sum(R.*R) / n;
 endfunction
 
 ## Use for the experiments just 0,5% of the total available data.
@@ -76,7 +80,7 @@ partition=75;
 
 ## The grid
 NX = [xx(:) yy(:)];
-indices = sub2ind([maxx, maxy], NX(:,1), NX(:,2));
+indices = sub2ind([maxy, maxx], NX(:,2), NX(:,1));
 rnz = rz(indices);
 
 printf("Linear regression started...");
@@ -106,7 +110,7 @@ fflush(stdout);
 lower_error = 1e10;
 best_z = [];
 best_tau = 0;
-for tau=1:10:100
+for tau=1:2:30
   nz1 = lwr(NX, X, z, tau);
   err = loss(rnz, nz1);
   if err < lower_error
