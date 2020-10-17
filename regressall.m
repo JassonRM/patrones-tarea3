@@ -99,6 +99,7 @@ printf("Weighed regression started...");
 fflush(stdout);
 tic();
 
+#soft curve
 tau=32;
 nz = lwr(NX,X,z,tau);
 
@@ -110,9 +111,13 @@ fflush(stdout);
 lower_error = 1e10;
 best_z = [];
 best_tau = 0;
+errors = [];
+taus = [];
 for tau=1:2:30
   nz1 = lwr(NX, X, z, tau);
   err = loss(rnz, nz1);
+  taus = [taus tau];
+  errors = [errors err];
   if err < lower_error
     lower_error = err;
     best_z = nz1;
@@ -123,6 +128,7 @@ endfor
 printf("El mejor tau es %d\n", best_tau);
 
 ## Plot all the data and results
+
 
 figure(1,"name","Sensed data");
 plot3(X(:,1),X(:,2),z',".");
@@ -139,7 +145,7 @@ plot3(NX(:,1),NX(:,2),nz,"r.");
 xlabel("x")
 ylabel("y")
 zlabel("z")
-title("Linear weighted regression")
+title("Soft linear weighted regression")
 
 figure(3,"name","Regressed data (LR)");
 hold off;
@@ -161,4 +167,9 @@ plot3(NX(:,1),NX(:,2),best_z,"r.");
 xlabel("x")
 ylabel("y")
 zlabel("z")
-title("Best tau value")
+title(strcat("Best tau value = ", num2str(best_tau)))
+
+figure(5,"name","Error");
+plot(taus, errors, "linewidth", 3);
+xlabel("tau")
+ylabel("error")
